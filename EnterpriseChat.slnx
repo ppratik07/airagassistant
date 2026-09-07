@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EnterpriseChat.Api/EnterpriseChat.Api.csproj" />
+    <Project Path="src/EnterpriseChat.Application/EnterpriseChat.Application.csproj" />
+    <Project Path="src/EnterpriseChat.Infrastructure/EnterpriseChat.Infrastructure.csproj" />
+  </Folder>
+</Solution>
