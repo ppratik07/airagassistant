@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <ItemGroup>
+    <ProjectReference Include="..\EnterpriseChat.Application\EnterpriseChat.Application.csproj" />
+    <ProjectReference Include="..\EnterpriseChat.Infrastructure\EnterpriseChat.Infrastructure.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
