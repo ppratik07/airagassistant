@@ -32,8 +32,13 @@ public sealed class ToolRegistry : IToolRegistry
                 $"Tool '{functionCall.Name}' is not registered.");
         }
 
-        return await tool.InvokeAsync(
-            functionCall.Arguments,
-            cancellationToken);
+        AIFunctionArguments? arguments = functionCall.Arguments is null
+            ? null
+            : new AIFunctionArguments(
+                functionCall.Arguments.ToDictionary(
+                    static pair => pair.Key,
+                    static pair => pair.Value!));
+
+        return await tool.InvokeAsync(arguments, cancellationToken);
     }
 }

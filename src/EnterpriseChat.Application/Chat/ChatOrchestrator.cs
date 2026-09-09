@@ -43,13 +43,13 @@ public sealed class ChatOrchestrator : IChatOrchestrator
 
         var options = new ChatOptions
         {
-            Tools = _toolRegistry.GetTools()
+            Tools = _toolRegistry.GetTools().ToList()
         };
 
         while (true)
         {
             var assistantMessage =
-                new ChatMessage(ChatRole.Assistant);
+                new ChatMessage(ChatRole.Assistant, []);
 
             await foreach (
                 var update in _chatClient
