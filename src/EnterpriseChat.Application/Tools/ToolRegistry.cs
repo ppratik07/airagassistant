@@ -20,7 +20,9 @@ public sealed class ToolRegistry : IToolRegistry
             .ToList();
     }
 
-    public async Task<object?> ExecuteAsync(FunctionCallContent functionCall,CancellationToken cancellationToken) =>
+    public async Task<object?> ExecuteAsync(
+        FunctionCallContent functionCall,
+        CancellationToken cancellationToken)
     {
         if (!_tools.TryGetValue(
                 functionCall.Name,
