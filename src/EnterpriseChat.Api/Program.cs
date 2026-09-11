@@ -4,6 +4,7 @@ using EnterpriseChat.Application.Tools;
 using EnterpriseChat.Infrastructure.AI;
 using Microsoft.Extensions.AI;
 
+//Creates the host, Loads configs , setups logging and DI
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAIClient(

@@ -10,44 +10,52 @@ public static class ChatEndpoints
 
     public static IEndpointRouteBuilder MapChatEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/v1/chat/stream", async (
-            ChatRequest request,
-            IChatService chatService,
-            HttpContext httpContext,
-            CancellationToken cancellationToken) =>
-        {
-            httpContext.Response.Headers.CacheControl = "no-cache";
-            httpContext.Response.Headers.Connection = "keep-alive";
-            httpContext.Response.ContentType = "text/event-stream";
-
-            try
-            {
-                await foreach (var streamEvent in chatService.StreamAsync(request, cancellationToken))
-                {
-                    var data = streamEvent.Data is null
-                        ? "null"
-                        : JsonSerializer.Serialize(streamEvent.Data, JsonOptions);
-
-                    await httpContext.Response.WriteAsync(
-                        $"event: {streamEvent.Type}\ndata: {data}\n\n",
-                        cancellationToken);
-
-                    await httpContext.Response.Body.FlushAsync(cancellationToken);
-                }
-            }
-            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
-            {
-                var error = StreamEvent.Error(ex.Message);
-                var data = JsonSerializer.Serialize(error.Data, JsonOptions);
-
-                await httpContext.Response.WriteAsync(
-                    $"event: {error.Type}\ndata: {data}\n\n",
-                    cancellationToken);
-
-                await httpContext.Response.Body.FlushAsync(cancellationToken);
-            }
-        });
-
+        app.MapPost("/api/v1/chat/stream", StreamChat);
         return app;
+    }
+
+    private static async Task StreamChat( ChatRequest request, IChatService chatService,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        ConfigureSseResponse(httpContext.Response);
+
+        try
+        {
+            await foreach (var streamEvent in chatService.StreamAsync(request, cancellationToken))
+            {
+                await WriteSseEventAsync(httpContext.Response, streamEvent, cancellationToken);
+            }
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            await WriteSseEventAsync(
+                httpContext.Response,
+                StreamEvent.Error(ex.Message),
+                cancellationToken);
+        }
+    }
+
+    private static void ConfigureSseResponse(HttpResponse response)
+    {
+        response.Headers.CacheControl = "no-cache";
+        response.Headers.Connection = "keep-alive";
+        response.ContentType = "text/event-stream";
+    }
+
+    private static async Task WriteSseEventAsync(
+        HttpResponse response,
+        StreamEvent streamEvent,
+        CancellationToken cancellationToken)
+    {
+        var data = streamEvent.Data is null
+            ? "null"
+            : JsonSerializer.Serialize(streamEvent.Data, JsonOptions);
+
+        await response.WriteAsync(
+            $"event: {streamEvent.Type}\ndata: {data}\n\n",
+            cancellationToken);
+
+        await response.Body.FlushAsync(cancellationToken);
     }
 }

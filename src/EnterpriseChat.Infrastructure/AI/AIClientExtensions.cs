@@ -75,8 +75,10 @@ public static class AIClientExtensions
         };
     }
 
+    //=> expression-bodied method
     private static string GetValue(
-        IConfiguration configuration,
+        IConfiguration configuration, //reads from appsettings.json Environment variables User secrets
+                                      // Command-line arguments etc
         string environmentVariable,
         string configurationKey) =>
         configuration[environmentVariable]
