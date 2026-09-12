@@ -54,9 +54,10 @@ public static class ChatEndpoints
 
     private static void ConfigureSseResponse(HttpResponse response)
     {
-        response.Headers.CacheControl = "no-cache";
-        response.Headers.Connection = "keep-alive";
-        response.ContentType = "text/event-stream";
+        //These HTTP headers tell the browser :"This isn't a normal response. This is an SSE stream."
+        response.Headers.CacheControl = "no-cache"; //Don't cache this response.
+        response.Headers.Connection = "keep-alive"; //Keep the connection open so more events can arrive.;
+        response.ContentType = "text/event-stream"; //This HTTP response is a Server-Sent Events stream.
     }
 
     private static async Task WriteSseEventAsync(
@@ -71,7 +72,8 @@ public static class ChatEndpoints
         await response.WriteAsync(
             $"event: {streamEvent.Type}\ndata: {data}\n\n",
             cancellationToken);
-
+    //Push the data I've written to the client now.
+    // Without proper flushing/buffering behavior, data might sit in a buffer instead of reaching the browser immediately.
         await response.Body.FlushAsync(cancellationToken);
     }
 }
