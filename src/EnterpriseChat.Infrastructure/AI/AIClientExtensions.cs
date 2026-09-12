@@ -6,12 +6,16 @@ using System.ClientModel;
 
 namespace EnterpriseChat.Infrastructure.AI;
 
-public static class AIClientExtensions
+public static class AIClientExtensions   //Static Means you don't need to create an object of the class to call this
+                                         //method.
 {
+    
+    //This is the collection where you register your application's services.
     public static IServiceCollection AddAIClient(
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        //Get AZURE Configuration
         var options = BindAzureOpenAIOptions(configuration);
 
         if (string.IsNullOrWhiteSpace(options.ApiKey))
@@ -32,8 +36,10 @@ public static class AIClientExtensions
                 "Azure OpenAI deployment is not configured. Set AZURE_OPENAI_DEPLOYMENT.");
         }
 
+        //Create the SDK options.
         var clientOptions = CreateClientOptions(options.ApiVersion);
 
+        //creates the Azure OpenAI client.
         var azureClient = clientOptions is null
             ? new AzureOpenAIClient(
                 new Uri(options.Endpoint),
@@ -43,6 +49,7 @@ public static class AIClientExtensions
                 new ApiKeyCredential(options.ApiKey),
                 clientOptions);
 
+        //creates an IChatClient connected to your azure open ai -> gpt.x deployment
         IChatClient chatClient = azureClient
             .GetChatClient(options.Deployment)
             .AsIChatClient();
@@ -52,28 +59,32 @@ public static class AIClientExtensions
         return services;
     }
 
-    private static AzureOpenAIOptions BindAzureOpenAIOptions(IConfiguration configuration)
-    {
-        return new AzureOpenAIOptions
+    //Get AZURE Configuration
+    private static AzureOpenAIOptions BindAzureOpenAIOptions(
+        IConfiguration configuration) =>
+        new AzureOpenAIOptions
         {
             ApiKey = GetValue(
                 configuration,
                 "AZURE_OPENAI_API_KEY",
                 "AzureOpenAI:ApiKey"),
+
             Endpoint = GetValue(
                 configuration,
                 "AZURE_OPENAI_ENDPOINT",
                 "AzureOpenAI:Endpoint"),
+
             Deployment = GetValue(
                 configuration,
                 "AZURE_OPENAI_DEPLOYMENT",
                 "AzureOpenAI:Deployment"),
+
             ApiVersion = GetValue(
                 configuration,
                 "AZURE_OPENAI_API_VERSION",
                 "AzureOpenAI:ApiVersion")
         };
-    }
+    
 
     //=> expression-bodied method
     private static string GetValue(

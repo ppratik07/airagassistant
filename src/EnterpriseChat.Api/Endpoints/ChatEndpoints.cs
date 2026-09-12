@@ -6,6 +6,20 @@ namespace EnterpriseChat.Api.Endpoints;
 
 public static class ChatEndpoints
 {
+    //This creates JSON serialization settings.
+    // public string UserName { get; set; }
+    //
+    // and web JSON generally becomes:
+    //
+    // {
+    //     "userName": "Pratik"
+    // }
+    //
+    // instead of:
+    //
+    // {
+    //     "UserName": "Pratik"
+    // }
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static IEndpointRouteBuilder MapChatEndpoints(this IEndpointRouteBuilder app)
@@ -22,11 +36,13 @@ public static class ChatEndpoints
 
         try
         {
+            //Call the chat service and asynchronously receive events one by one.
             await foreach (var streamEvent in chatService.StreamAsync(request, cancellationToken))
             {
                 await WriteSseEventAsync(httpContext.Response, streamEvent, cancellationToken);
             }
         }
+        //Handle the exception only if the request wasn't cancelled.
         catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {
             await WriteSseEventAsync(

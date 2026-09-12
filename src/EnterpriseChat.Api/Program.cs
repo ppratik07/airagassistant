@@ -8,7 +8,7 @@ using Microsoft.Extensions.AI;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAIClient(
-    builder.Configuration);
+    builder.Configuration);       // Since this IServiceCollection services is a extension method
 
 builder.Services.AddSingleton<IChatService, ChatService>();
 builder.Services.AddSingleton<IChatOrchestrator, ChatOrchestrator>();
